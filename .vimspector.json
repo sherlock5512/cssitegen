@@ -1,0 +1,20 @@
+ {
+   "configurations": {
+     "attach": {
+       "adapter": "netcoredbg",
+       "configuration": {
+         "request": "attach",
+         "processId": "${pid}"
+       }
+     },
+     "launch": {
+       "adapter": "netcoredbg",
+       "configuration": {
+         "request": "launch",
+         "program": "/home/robert/Projects/csSiteGen/bin/Debug/net6.0/csSiteGen.dll",
+         "args": [],
+         "stopAtEntry": false
+       }
+     }
+   }
+ }
