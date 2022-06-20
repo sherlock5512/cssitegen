@@ -111,6 +111,14 @@ class Program
 		List<string> res = new List<string>();
 		List<string> files = GetAllFiles(directory);
 
+	void Usage()
+	{
+		/*
+		 * This function will be called when argument errors happen. This will
+		 * also be called if the user triggers the help flag currently this
+		 * function throws a not implemented exception since it I cannot write
+		 * the usage until I have other functionality
+		 */
 		throw new NotImplementedException();
 	}
 	static Tuple<bool,Dictionary<string,string>?> CheckDeps(List<string>? dependencies)
