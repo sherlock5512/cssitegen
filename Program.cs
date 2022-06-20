@@ -49,7 +49,6 @@ class Program
 		{
 			Log.Error("Output directory '{o}' Does not exist or is not a directory you have access to" , _outputDirectory);
 
-			Console.WriteLine("Do");
 			Environment.Exit(1);
 		}
 
