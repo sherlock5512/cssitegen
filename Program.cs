@@ -86,6 +86,8 @@ class Program
 
 		dirs.Push(directory);
 		Log.Debug("Dirs Starting as: {DirStack}",dirs );
+		Stopwatch timer = new();
+		timer.Start();
 
 		while (dirs.Count > 0)
 		{
@@ -107,6 +109,8 @@ class Program
 				Log.Debug("Adding Directory {subdir} to dirs\nResult: {dirs}",subdir,dirs);
 			}
 		}
+		timer.Stop();
+		Log.Information("Crawled {directory} in {time}ms with {number} results",directory,timer.ElapsedMilliseconds,res.Count());
 
 		return res;
 	}
