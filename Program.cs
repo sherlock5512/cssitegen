@@ -48,15 +48,13 @@ class Program
 
 		if (args.Length < 2)
 		{
-			Log.Error("Too Few Args");
+			Log.Error("Too Few Args: Expected at least 2 but received {Count}",args.Length);
 			return 1;
 		}
 
 		string _inputDirectory = args[0];
 		string _outputDirectory = args[1];
 
-		Log.Debug("{_inputDirectory} , {_outputDirectory}",_inputDirectory,_outputDirectory);
-		Log.Debug("{a} , {b}",Directory.Exists(_inputDirectory),Directory.Exists(_outputDirectory));
 
 		if (!Directory.Exists(_inputDirectory))
 		{
