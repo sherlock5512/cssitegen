@@ -18,6 +18,9 @@
 
 using Serilog;
 using System.Reflection;
+using System.Text.RegularExpressions;
+using System.Diagnostics;
+// using System.Text.Json;
 
 namespace csSiteGen;
 
@@ -29,6 +32,7 @@ class Program
 		// Get the current versiion number
 		string? version = Assembly.GetEntryAssembly()?.GetCustomAttribute<AssemblyInformationalVersionAttribute>()?.InformationalVersion;
 
+		// Configure logger
 		Log.Logger = new LoggerConfiguration()
 			.MinimumLevel.Debug()
 			.WriteTo.Console()
@@ -46,6 +50,7 @@ class Program
 			Log.Error("Cannot get Version Information");
 		}
 
+		// Exit on argument errors
 		if (args.Length < 2)
 		{
 			Log.Error("Too Few Args: Expected at least 2 but received {Count}",args.Length);
@@ -57,9 +62,9 @@ class Program
 		{
 			Log.Warning("This program has only been tested on linux and cannot be assumed to work on other Operating Systems");
 		}
+
 		string _inputDirectory = args[0];
 		string _outputDirectory = args[1];
-
 
 		if (!Directory.Exists(_inputDirectory))
 		{
@@ -69,7 +74,6 @@ class Program
 		if (!Directory.Exists(_outputDirectory))
 		{
 			Log.Error("Output directory '{o}' Does not exist or is not a directory you have access to" , _outputDirectory);
-
 			Environment.Exit(1);
 		}
 
@@ -104,7 +108,6 @@ class Program
 		Log.Debug("Dirs Starting as: {DirStack}",dirs );
 		Stopwatch timer = new();
 		timer.Start();
-
 		while (dirs.Count > 0)
 		{
 			var dir = dirs.Pop();
@@ -127,7 +130,6 @@ class Program
 		}
 		timer.Stop();
 		Log.Information("Crawled {directory} in {time}ms with {number} results",directory,timer.ElapsedMilliseconds,res.Count());
-
 		return res;
 	}
 
@@ -142,6 +144,8 @@ class Program
 		res = files.FindAll( x => expression.IsMatch(x));  // Here a lambda function is used as a predicate to do regex across the whole file list
 
 		return res;
+	}
+
 	void Usage()
 	{
 		/*
@@ -152,6 +156,7 @@ class Program
 		 */
 		throw new NotImplementedException();
 	}
+
 	static Tuple<bool,Dictionary<string,string>?> CheckDeps(List<string>? dependencies)
 	{
 		bool success = true;
