@@ -99,6 +99,19 @@ class Program
 		return 0;
 	}
 
+/// <summary>
+/// Returns a list of all the files in the given directory and all subdirectories recursive
+///	</summary>
+/// <remarks>
+/// Currently this function ignores reparse points (symlinks) so as to avoid infinite loops.
+/// It is probably a good idea to make the function aware of loops so it can read symlinks.
+/// </remarks>
+/// <param name="directory">
+/// The directory to find files in.
+/// <param>
+/// <returns>
+/// A string list of every file in the provided directory and all subdirectories
+/// </returns>
 	static List<string> GetAllFiles(string directory)
 	{
 		List<string> res = new();
