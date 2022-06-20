@@ -23,7 +23,6 @@
 
 	<PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">
 		<!--	Here we define the Debug Build.
-			The Release Build will also do -Werror as I don't want to release shitty code
 		-->
 		<TreatWarningsAsErrors>true</TreatWarningsAsErrors>
 	</PropertyGroup>
