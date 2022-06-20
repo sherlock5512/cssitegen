@@ -113,4 +113,65 @@ class Program
 
 		throw new NotImplementedException();
 	}
+	static Tuple<bool,Dictionary<string,string>?> CheckDeps(List<string>? dependencies)
+	{
+		bool success = true;
+
+		if (! (dependencies?.Count() > 0)) // assume success as no dependencies
+		{
+			return new Tuple<bool,Dictionary<string,string>?>(true,null);
+		}
+
+
+		var path = System.Environment.GetEnvironmentVariable("PATH")?.Split(':');
+		if (path is null)
+		{
+			Log.Error("Cannot read system path.");
+			Environment.Exit(1);
+		}
+		Log.Debug("Path is: {path}",path);
+
+		List<string> executables = new();
+		foreach (string dir in path)
+		{
+			if (Directory.Exists(dir)) // Sometimes People fuck up their path variables and include directories that don't exist.
+			{
+				executables.AddRange(GetAllFiles(dir));
+			}
+		}
+		Log.Verbose("Executables are: {executables}",executables);
+
+		// Do some regex magic to find an executable in the path.
+		Dictionary<string,string>? result = new();
+		Dictionary<string,string>? failures = new();
+
+		foreach (string dependency in dependencies)
+		{
+			string regex = $"/(.*/)*{dependency}";
+			Regex expr = new Regex(regex,RegexOptions.Compiled);
+			Log.Debug("Compiled regex: {expr}",expr);
+			string? match = executables.Find( x => expr.IsMatch(x));
+			if (match is not null && match != "")
+			{
+				Log.Information("Dependency {dep} found at {path}",dependency,match);
+				result.Add(dependency,match); // Create a dictionary of paths to found executables
+			}
+			else
+			{
+				Log.Information("Dependency {dep} cannot be found",dependency);
+				success = false;
+				failures.Add(dependency,dependency);
+			}
+		}
+
+		if (success)
+		{
+			return new Tuple<bool,Dictionary<string,string>?>(success,result);
+		}
+		else
+		{
+			return new Tuple<bool,Dictionary<string,string>?>(success,failures);
+		}
+	}
+
 }
