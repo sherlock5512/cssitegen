@@ -29,6 +29,22 @@ class Program
 
 	static int Main(string[] args)
 	{
+		// Default values
+		List<string> _verbatimFileTypes = new List<string>{ // file extenstions we want to have copied verbatim
+			"html", // Premade html pages
+			"css", // Style Sheets
+			// IMAGE TYPES TODO: add webp conversion for most images.
+			"jpg",
+			"png",
+			"webp",
+			"gif"
+		};
+		// TODO: Make this a dictionary/tuple to show a FROM -> TO filetype relationship (Possibly with program)
+		List<string> _conversionTypes = new List<string>{ // file extenstions we want to convert to html
+			"md"
+		};
+
+
 		// Get the current versiion number
 		string? version = Assembly.GetEntryAssembly()?.GetCustomAttribute<AssemblyInformationalVersionAttribute>()?.InformationalVersion;
 
