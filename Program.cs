@@ -79,6 +79,7 @@ class Program
 			Log.Warning("This program has only been tested on linux and cannot be assumed to work on other Operating Systems");
 		}
 
+		// Get and check the directories passed to the program
 		string _inputDirectory = args[0];
 		string _outputDirectory = args[1];
 
