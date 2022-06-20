@@ -95,6 +95,11 @@ class Program
 			{
 				if(File.GetAttributes(subdir).HasFlag(FileAttributes.ReparsePoint))
 				{
+					/*
+					 * FIXME: This is only a temporary measure and should not be relied upon
+					 * if possible there should be a depth detection system that allows for
+					 * safe symlink following.
+					 */
 					Log.Debug("Directory {subdir} is a ReparsePoint(symlink) and has been ignored",subdir);
 					continue;
 				}
