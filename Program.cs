@@ -94,25 +94,34 @@ class Program
 			Environment.Exit(1);
 		}
 
-		List<string> Input_files = GetAllFiles(_inputDirectory);
-		Log.Information("Input File Count: {count}",Input_files.Count());
-		foreach (string item in Input_files)
-		{
-			Console.WriteLine(item);
-		}
-
-		List<string> MatchFiles = GetAllFilesMatching(".*r.*",_inputDirectory);
-
-		Log.Information("MatchFiles '.*r.*' File Count: {count}",MatchFiles.Count());
-		foreach (string item in MatchFiles)
-		{
-			Console.WriteLine(item);
-		}
-
+		// Test for dependencies
 		List<string> deps = new List<string>{"pandoc"};
-		var dep2 = CheckDeps(deps);
-		Log.Debug("CheckDeps result: {@dep}",dep2);
+		var dep = CheckDeps(deps);
+		Log.Debug("CheckDeps result: {@dep}",dep);
 
+		// Deal with the dependency test results
+		Dictionary<string,string> depsDict = new();
+		if (dep.Item2 is null)
+		{
+			Log.Debug("Ignoring dependency check as no dependencies listed");
+		}
+		else
+		{
+			depsDict = dep.Item2;
+		}
+		if (!dep.Item1)
+		{
+			foreach (var dependency in depsDict)
+			{
+				Log.Error("Dependency {dependency} Cannot be found\nPlease install it or check it is in your PATH",dependency.Key);
+			}
+			Log.CloseAndFlush();
+			Environment.Exit(1);
+		}
+
+
+
+		Log.CloseAndFlush();
 		return 0;
 	}
 
