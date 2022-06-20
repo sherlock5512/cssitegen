@@ -52,6 +52,11 @@ class Program
 			return 1;
 		}
 
+		// It is very likely that this program will only work on linux. As such it is worth warning the user about this.
+		if (!OperatingSystem.IsLinux())
+		{
+			Log.Warning("This program has only been tested on linux and cannot be assumed to work on other Operating Systems");
+		}
 		string _inputDirectory = args[0];
 		string _outputDirectory = args[1];
 
