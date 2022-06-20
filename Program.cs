@@ -74,10 +74,21 @@ class Program
 		{
 			Console.WriteLine(item);
 		}
+
+		List<string> MatchFiles = GetAllFilesMatching(".*r.*",_inputDirectory);
+
+		Log.Information("MatchFiles '.*r.*' File Count: {count}",MatchFiles.Count());
+		foreach (string item in MatchFiles)
+		{
+			Console.WriteLine(item);
+		}
+
+		List<string> deps = new List<string>{"pandoc"};
+		var dep2 = CheckDeps(deps);
+		Log.Debug("CheckDeps result: {@dep}",dep2);
+
 		return 0;
 	}
-
-
 
 	static List<string> GetAllFiles(string directory)
 	{
