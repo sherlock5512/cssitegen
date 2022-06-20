@@ -111,6 +111,12 @@ class Program
 		List<string> res = new List<string>();
 		List<string> files = GetAllFiles(directory);
 
+		Regex expression = new Regex(pattern,
+				RegexOptions.Compiled);
+
+		res = files.FindAll( x => expression.IsMatch(x));  // Here a lambda function is used as a predicate to do regex across the whole file list
+
+		return res;
 	void Usage()
 	{
 		/*
