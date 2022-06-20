@@ -108,7 +108,7 @@ class Program
 
 	static List<string> GetAllFilesMatching(string pattern, string directory)
 	{
-		List<string> res = new List<string>();
+		List<string> res = new();
 		List<string> files = GetAllFiles(directory);
 
 		Regex expression = new Regex(pattern,
