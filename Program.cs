@@ -160,7 +160,7 @@ class Program
 	static Tuple<bool,Dictionary<string,string>?> CheckDeps(List<string>? dependencies)
 	{
 		bool success = true;
-
+		Stopwatch timer = new();
 		if (! (dependencies?.Count() > 0)) // assume success as no dependencies
 		{
 			return new Tuple<bool,Dictionary<string,string>?>(true,null);
@@ -176,6 +176,7 @@ class Program
 		Log.Debug("Path is: {path}",path);
 
 		List<string> executables = new();
+		timer = Stopwatch.StartNew();
 		foreach (string dir in path)
 		{
 			if (Directory.Exists(dir)) // Sometimes People fuck up their path variables and include directories that don't exist.
@@ -183,7 +184,9 @@ class Program
 				executables.AddRange(GetAllFiles(dir));
 			}
 		}
+		timer.Stop();
 		Log.Verbose("Executables are: {executables}",executables);
+		Log.Information("Got executables list in {timer:000}ms",timer.ElapsedMilliseconds);
 
 		// Do some regex magic to find an executable in the path.
 		Dictionary<string,string>? result = new();
@@ -191,18 +194,21 @@ class Program
 
 		foreach (string dependency in dependencies)
 		{
+			timer = Stopwatch.StartNew();
 			string regex = $"/(.*/)*{dependency}";
 			Regex expr = new Regex(regex,RegexOptions.Compiled);
 			Log.Debug("Compiled regex: {expr}",expr);
 			string? match = executables.Find( x => expr.IsMatch(x));
 			if (match is not null && match != "")
 			{
-				Log.Information("Dependency {dep} found at {path}",dependency,match);
+				timer.Stop();
+				Log.Information("Dependency {dep} found at {path} in {timer:000}ms",dependency,match,timer.ElapsedMilliseconds);
 				result.Add(dependency,match); // Create a dictionary of paths to found executables
 			}
 			else
 			{
-				Log.Information("Dependency {dep} cannot be found",dependency);
+				timer.Stop();
+				Log.Information("Dependency {dep} cannot be found, search took {timer:000ms}",dependency,timer.ElapsedMilliseconds);
 				success = false;
 				failures.Add(dependency,dependency);
 			}
