@@ -120,6 +120,12 @@ class Program
 			Environment.Exit(1);
 		}
 
+		List<string> ConvertableInputFiles = new();
+		foreach (var ext in _conversionTypes)
+		{
+			ConvertableInputFiles.AddRange(GetAllFilesMatching($".*{ext}",_inputDirectory));
+		}
+		Log.Debug("Files matching conversiontypes: {@conversionType} found {count} \n {files} ",_conversionTypes,ConvertableInputFiles.Count(),ConvertableInputFiles);
 
 
 		Log.CloseAndFlush();
