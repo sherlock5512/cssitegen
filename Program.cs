@@ -21,7 +21,7 @@ using Serilog.Events;
 using System.Reflection;
 using System.Text.RegularExpressions;
 using System.Diagnostics;
-// using System.Text.Json;
+using System.Text.Json;
 
 namespace csSiteGen;
 
@@ -126,6 +126,42 @@ class Program
 			ConvertableInputFiles.AddRange(GetAllFilesMatching($".*{ext}",_inputDirectory));
 		}
 		Log.Debug("Files matching conversiontypes: {@conversionType} found {count} \n {files} ",_conversionTypes,ConvertableInputFiles.Count(),ConvertableInputFiles);
+
+		Dictionary<string,DateTime>? metadata = null;
+		if (File.Exists($"{_inputDirectory}/.files"))
+		{
+			Log.Information("Loading metadata for {src}",_inputDirectory);
+			metadata = new();
+			string metaJSON = File.ReadAllText($"{_inputDirectory}/.files");
+			try
+			{
+				Type metadataType = metadata.GetType();
+				metadata = JsonSerializer.Deserialize<Dictionary<string,DateTime>>(metaJSON);
+			}
+			catch (JsonException e)
+			{
+				Log.Debug(e,"Cannot deserialize .files Json data");
+				Log.Debug("As this is possibly caused by an internal interface change the file will be deleted");
+				File.Delete($"{_inputDirectory}/.files");
+			}
+		}
+
+		if (metadata is not null)
+		{
+			// Use metadata to determine if files have been updated
+			// A shadow list is used here so we can iterate and modify at the same time
+			List<string> shadow = new List<string>(ConvertableInputFiles);
+			foreach (string file in shadow)
+			{
+				if (metadata[file] == new FileInfo(file).LastWriteTimeUtc)
+				{
+					Log.Debug("File {file} has not been updated since last run. ignoring",file);
+					ConvertableInputFiles.Remove(file);
+				}
+			}
+		}
+		Log.Information("{count} Files need converting",ConvertableInputFiles.Count());
+		Log.Debug("Files: {files}",ConvertableInputFiles);
 
 
 		Log.CloseAndFlush();
