@@ -312,3 +312,16 @@ class Program
 		return false;
 	}
 }
+		// if (!File.Exists($"{_inputDirectory}/.files"))
+		// {
+			// Log.Information("Creating metadata for {src}",_inputDirectory);
+			// metadata = new();
+			// foreach (var file in ConvertableInputFiles)
+			// {
+				// FileInfo info = new FileInfo(file);
+				// DateTime LastMod = info.LastWriteTimeUtc;
+				// metadata.Add(file,LastMod);
+				// string metaJSON = JsonSerializer.Serialize(metadata);
+				// File.WriteAllText($"{_inputDirectory}/.files",metaJSON);
+			// }
+		// }
