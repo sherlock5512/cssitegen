@@ -17,6 +17,7 @@
  */
 
 using Serilog;
+using Serilog.Events;
 using System.Reflection;
 using System.Text.RegularExpressions;
 using System.Diagnostics;
@@ -51,7 +52,7 @@ class Program
 		// Configure logger
 		Log.Logger = new LoggerConfiguration()
 			.MinimumLevel.Debug()
-			.WriteTo.Console()
+			.WriteTo.Console(restrictedToMinimumLevel: LogEventLevel.Information)
 			.WriteTo.File("log.log")
 			.CreateLogger();
 
