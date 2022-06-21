@@ -264,4 +264,9 @@ class Program
 		}
 	}
 
+	static bool Convert(Dictionary<string,string> files)
+	{
+
+		return false;
+	}
 }
