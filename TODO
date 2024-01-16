@@ -1,0 +1,5 @@
+- Add a pre-commit or other type of hook to ensure that the Testing directory is properly cleaned and reset before commit.
+- Double check that links are processed correctly by testing against a copy of my blog source.
+	- Also add the appropriate metadata to the markdown files to make sure that they are properly detected.
+	- Potentially host a local Test version to fully ensure that everything can be made to work properly.
+- Look into the possiblity of using a TemplateTemplate, And generating the pandoc template on the fly making it possible to switch out domian/prefix stuff

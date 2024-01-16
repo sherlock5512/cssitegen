@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="$lang$" xml:lang="$lang$"$if(dir)$ dir="$dir$"$endif$>
+<head>
+$-- #### STATIC HEAD ELEMENTS
+  <meta charset="UTF-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=yes" />
+  <meta property="og:type" content="article" />
+  <meta property="og:site_name" content="Robert's Place">
+  <meta name="twitter:card" content="summary_large_image" />
+  <link rel="shortcut icon" href="https://www.closedless.xyz/~robert/favicon.png" type="image/png">
+  <link rel="stylesheet" href="https://www.closedless.xyz/~robert/css/blog.css" type="text/css" media="all">
+$-- #### VARIABLE HEAD ELEMENTS
+  <title>$if(title-prefix)$$title-prefix$ – $endif$$pagetitle$</title>
+  <meta property="og:title" content="$title$"/>
+  <meta property="og:url" content="http://euro-travel-example.com/index.htm" />
+$for(author-meta)$ $-- Include author information
+  <meta name="author" content="$author-meta$" />
+$endfor$
+$if(date-meta)$ $-- Include date information
+  <meta name="dcterms.date" content="$date-meta$" />
+$endif$
+$if(keywords)$ $-- Include Keywords
+  <meta name="keywords" content="$for(keywords)$$keywords$$sep$, $endfor$" />
+$endif$
+$if(description-meta)$ $-- Include description
+  <meta name="description" content="$description-meta$" />
+  <meta property="og:description" content="$description-meta$">
+$endif$
+$if(image)$ $-- OPTIONAL set image for link cards
+  <meta property="og:image" content="$image$" />
+$else$ $-- Defaults to favicon
+  <meta property="og:image" content="https://closedless.xyz/~robert/favicon.png">
+$endif$
+$if(alt-text)$ $-- OPTIONAL Include alt text for twitter
+ <meta name="twitter:image:alt" content="$alt-text$">
+$endif$
+
+$if(math)$ $-- I think this includes some kind of css
+  $math$
+$endif$
+
+$for(header-includes)$ $-- Include any external data
+  $header-includes$
+$endfor$
+
+$if(needs-syntax-highlighting)$ $-- If set then include css and JS for syntax highlighting
+  <link rel="stylesheet" href="https://closedless.xyz/resources/CSS/hljs-gruvbox-CSSVARS.css" type="text/css" media="all">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.7.1/highlight.min.js"></script>
+$endif$
+$if(style)$ $-- Include page specfic style (To reduce size of page load on other pages)
+  <style>$style$</style>
+$endif$
+</head>
+<body class="sans"> $-- default to sans-serif --$
+    <nav class="navbar mono"> $-- navbar in monospace --$
+	<div class="bar-left">
+	    <ul>
+		<li>
+		    <a href="https://www.closedless.xyz/~robert">
+			<img class="minipic" src="https://www.closedless.xyz/~robert/favicon.png">
+			<span class="site-title">Robert's Place</span>
+		    </a>
+		</li>
+	    </ul>
+	</div>
+	<div class="bar-right">
+	    <ul>
+		<li>
+		    <a id="dark-toggle" class="nf nf-fa-moon_o" onclick="changeTheme()"></a>
+		</li>
+		<li>
+		    <a href="https://instagram.com/sherlock5512" class="nf nf-mdi-instagram"> Instagram</a>
+		</li>
+	    </ul>
+	</div>
+    </nav>
+$body$
+<footer class="Ilow">
+    <p>
+	Design based on <a href="https://notthebe.ee/">Wolfgang's blog</a> (<a href="https://creativecommons.org/licenses/by-nc/4.0">CC-BY-NC 4.0</a>)
+	<br>
+	Pages generated from markdown from markdown using <a class="mono" href="https://romanzolotarev.com/ssg.html">ssg5</a> by Roman Zolotarev
+    </p>
+</footer>
+<script charset="utf-8">
+    $if(needs-syntax-highlighting)$hljs.highlightAll();$endif$
+    console.log("TEST");
+    initLoad();
+</script>
+</body>
+</html>
