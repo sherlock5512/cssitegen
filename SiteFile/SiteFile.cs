@@ -72,13 +72,9 @@ public partial class SiteFile
 			LoadMetadata(settings);
 		}
 
-		// NOTE: By this point Metadata CANNOT be null as LoadMetadata would either have loaded the JSON or instantiated MetaData
-		if (Metadata!.GetValueOrDefault(info.FullName, DateTime.MinValue) == info.LastWriteTimeUtc)
-		{
-			return false;
-		}
-
-		return true;
+		// NOTE: By this point Metadata CANNOT be null as LoadMetadata would either have loaded the JSON or instantiated blank MetaData
+		// The compiler however is unaware of this as it uses side effects, so we tell it there is no possible null value here.
+		return (Metadata!.GetValueOrDefault(info.FullName, DateTime.MinValue) == info.LastWriteTimeUtc);
 	}
 
 
