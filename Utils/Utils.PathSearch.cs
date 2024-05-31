@@ -3,6 +3,8 @@ namespace csSiteGen;
 
 public static partial class Utils {
 
+	// As the PathSearch utility will be called for every convertible file
+	// It has been memoized which mean subsequent calls for the same argument just return the result
 	static Dictionary<string,string> PathSearchMemo = new();
 
 	///<summary>

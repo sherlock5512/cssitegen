@@ -25,6 +25,7 @@ using System.CommandLine;
 using System.Diagnostics;
 using System.Reflection;
 using Spectre.Console;
+using System.Text.Json;
 
 namespace csSiteGen;
 
@@ -34,10 +35,12 @@ class Program
 	static int Main(string[] args)
 	{
 
-		// Get the current versiion number
+		// Get the current version number
 		string? version = Assembly.GetEntryAssembly()?.GetCustomAttribute<AssemblyInformationalVersionAttribute>()?.InformationalVersion;
 
-		// Configure logger
+		// Only log to file
+		// Logging to the console is BAD practice as it tends to be messy.
+		// TODO: Log to a known location using environment to find the correct location.
 		Log.Logger = new LoggerConfiguration()
 			.MinimumLevel.Debug()
 			.WriteTo.File("log.log")
@@ -55,6 +58,7 @@ class Program
 		}
 
 		// It is very likely that this program will only work on linux. As such it is worth warning the user about this.
+		// With further testing and handling of any edge cases it _may_ be possible to have this work anywhere.
 		if (!OperatingSystem.IsLinux())
 		{
 			Log.Warning("This program has only been tested on linux and cannot be assumed to work on other Operating Systems");
@@ -63,49 +67,64 @@ class Program
 
 		Stopwatch TotalExecutionTime = Stopwatch.StartNew();
 
-		var inputDirectoryOption = new Option<DirectoryInfo>(
-			name: "--input",
-			description: "The directory that contains the site source.");
-		inputDirectoryOption.IsRequired = true;
-		inputDirectoryOption.AddValidator(result =>
+		/* !! IMPORTANT !!
+			WARN:
+		This code uses system.commandline which is still in pre-release
+			the following section of code will contain comments to explain the intent of the programmer
+			which may be useful if system.commandline has breaking changes
+		*/
+
+
+		// First the option for the project directory is created
+		var ProjectDirectoryOption = new Option<DirectoryInfo>(
+				name: "--project",
+				description: "The Directory for the project");
+		ProjectDirectoryOption.IsRequired = false; // it is not required as not providing it infers that the current directory is the project directory
+		// If the option is used then the input is validated before control passes to any of the actual code.
+		ProjectDirectoryOption.AddValidator(result =>
+			{
+				if (!result.GetValueForOption(ProjectDirectoryOption)!.Exists)
 				{
-					if (!result.GetValueForOption(inputDirectoryOption)!.Exists)
-					{
-						result.ErrorMessage = $"Input directory {result.GetValueForOption(inputDirectoryOption)!.FullName} does not exist";
-					}
-				});
+					result.ErrorMessage = $"Project directory {result.GetValueForOption(ProjectDirectoryOption)} does not exist.";
+				}
+			}
+		);
 
-		var outputDirectoryOption = new Option<DirectoryInfo>(
-			name: "--output",
-			description: "The directory that the site should be output to.");
-		outputDirectoryOption.IsRequired = true;
-
+		// The root command is the entry point for commandline but otherwise does nothing.
 		var rootCommand = new RootCommand("csSiteGen");
 
-		var cleanCommand = new Command("clean", "Clean the output directory");
-		cleanCommand.AddOption(outputDirectoryOption);
-		cleanCommand.SetHandler(async (directory) =>
+
+		// TODO: Verify if the use of async in these functions is necessary
+
+		// This creates the command for cleaning a projects output directory.
+		var cleanCommand = new Command("clean", "Clean the projects output directory");
+		cleanCommand.AddOption(ProjectDirectoryOption); // This command can use the project directory option we created earlier
+		cleanCommand.SetHandler(async (ProjectDirectory) =>
 				{
 					await Task.Run(() =>
 						{
-							Clean(directory);
+							Clean(ProjectDirectory);
 						});
-				} ,outputDirectoryOption);
+				},ProjectDirectoryOption);
 
-		var convertCommand = new Command("convert", "Convert the input directory and place the files in the output directory.");
-		convertCommand.AddOption(inputDirectoryOption);
-		convertCommand.AddOption(outputDirectoryOption);
-		convertCommand.SetHandler(async (inputDir, outputDir) =>
+		// This creates the command for actually converting the project.
+		var convertCommand = new Command("convert", "Convert the projects input directory and place the files in the output directory.");
+		convertCommand.AddOption(ProjectDirectoryOption); // This command can use the project directory option
+		convertCommand.SetHandler(async (ProjectDirectory) =>
 				{
 					await Task.Run(() =>
 					{
-						Convert(inputDir, outputDir);
+						Convert(ProjectDirectory);
 					});
-				}, inputDirectoryOption, outputDirectoryOption);
+				},ProjectDirectoryOption);
 
+		// Adding the commands to the root command makes them actually callable on the commandline
 		rootCommand.AddCommand(cleanCommand);
 		rootCommand.AddCommand(convertCommand);
 
+		// The parser is what actually handles the arguments and dispatches them to the appropriate commands.
+		// This is used instead of the simpler method of just Invoking the root command as it automatically creates usage statements.
+		// It also makes a user aware that a subcommand needs to be used.
 		var parser = new CommandLineBuilder(rootCommand)
 			.UseDefaults()
 			.Build();
@@ -116,13 +135,28 @@ class Program
 		TotalExecutionTime.Stop();
 		Log.Information("TotalExecutionTime {time:000}ms", TotalExecutionTime.ElapsedMilliseconds);
 
+		// Providing there were no early exits it is best to properly close the log before we exit.
 		Log.CloseAndFlush();
 		return 0;
 	}
 
-	static int Convert(DirectoryInfo inputDir, DirectoryInfo outputDir)
+	static int Convert(DirectoryInfo? ProjectDirectory)
 	{
+		Log.Information("Convert command was called, beginning conversion.");
+
+		// WARN: This is only temporary as Spectre.Console does not recognise some Linux terminals
+		// A better solution that checks the terminal value and sets this option should be added in the future.
 		AnsiConsole.Console.Profile.Capabilities.Ansi = true;
+
+
+		// NOTE: Future refactors may merge ProjectSettings and RuntimeSettings
+		ProjectSettings projectSettings = GetProjectSettings(ProjectDirectory);
+
+		DirectoryInfo inputDir = new(projectSettings.Source);
+		DirectoryInfo outputDir = new(projectSettings.Destination);
+
+		RuntimeSettings settings = new(inputDir,outputDir);
+		settings.setBaseUrl(projectSettings.BaseUrl);
 
 		List<SiteFile> siteFiles = new();
 
@@ -130,7 +164,6 @@ class Program
 		Log.Information("SiteFiles: {@sf} {count}", siteFiles, siteFiles.Count);
 
 		Console.WriteLine($"Converting {siteFiles.Count} files from {inputDir.FullName} to {outputDir.FullName}");
-		RuntimeSettings settings = new(inputDir,outputDir);
 
 
 		Dictionary<string,bool> fileStatus = new();
@@ -187,8 +220,16 @@ class Program
 		return 0;
 	}
 
-	static int Clean(DirectoryInfo outputDir)
+	static int Clean(DirectoryInfo? ProjectDirectory)
 	{
+		Log.Information("Clean command was called, Beginning cleaning");
+
+		// NOTE: Future refactors may merge ProjectSettings and RuntimeSettings
+		ProjectSettings projectSettings = GetProjectSettings(ProjectDirectory);
+
+		DirectoryInfo inputDir = new(projectSettings.Source);
+		DirectoryInfo outputDir = new(projectSettings.Destination);
+
 		if (!outputDir.Exists)
 		{
 			Log.Warning("Not deleting {dir} as it doesn't exist",outputDir.FullName);
@@ -219,5 +260,58 @@ class Program
 			Log.Error(e, "Failed to delete/create directory {dir}", outputDir.FullName);
 			return 1;
 		}
+	}
+
+	static void EnforceConsistency(ProjectSettings projectSettings)
+	{
+		// Grab the metadata.
+
+		// Read the metadata.
+
+		// Find deleted files.
+
+		// Figure out what the new name for those files would be.
+
+		// Remove those files.
+
+	}
+
+	static ProjectSettings GetProjectSettings(DirectoryInfo? ProjectDirectory)
+	{
+		// TODO: implement proper error handling where file access is performed.
+
+		if (ProjectDirectory is null)
+		{
+			// use the current directory if no project directory is passed.
+		    ProjectDirectory = new DirectoryInfo(".");
+		}
+		Log.Information("{projectdir} => fullname {pdfn}",ProjectDirectory, ProjectDirectory.FullName);
+		FileInfo projectFile = new (Path.Combine(ProjectDirectory.FullName,"cssitegen.json"));
+
+
+		if (!projectFile.Exists)
+		{
+		    Log.Fatal("Cannot locate project file {pf} in {dir}",projectFile,ProjectDirectory);
+			Environment.Exit(1);
+		}
+
+		Log.Information("Located Project File {pf}",projectFile.FullName);
+		ProjectSettings? projectSettings = JsonSerializer
+			.Deserialize<ProjectSettings>(
+					projectFile
+					.OpenText()
+					.ReadToEnd()
+		);
+
+		if (projectSettings is null)
+		{
+		    Log.Fatal("Cannot deserialize projectFile");
+			Environment.Exit(1);
+		}
+		projectSettings.setProjectRoot(ProjectDirectory);
+
+		Log.Information("{@ps}",projectSettings);
+
+		return projectSettings;
 	}
 }

@@ -74,7 +74,11 @@ public partial class SiteFile
 
 		// NOTE: By this point Metadata CANNOT be null as LoadMetadata would either have loaded the JSON or instantiated blank MetaData
 		// The compiler however is unaware of this as it uses side effects, so we tell it there is no possible null value here.
-		return (Metadata!.GetValueOrDefault(info.FullName, DateTime.MinValue) == info.LastWriteTimeUtc);
+		Log.Debug("Attempting to check metadata for file {f}",info.FullName);
+		Log.Debug("METADATA={MD}",Metadata!.GetValueOrDefault(info.FullName,DateTime.MinValue));
+		Log.Debug("FILETIME={FT}",info.LastWriteTimeUtc);
+		Log.Debug("RES={res}",(Metadata!.GetValueOrDefault(info.FullName, DateTime.MinValue) != info.LastWriteTimeUtc));
+		return (Metadata!.GetValueOrDefault(info.FullName, DateTime.MinValue) != info.LastWriteTimeUtc);
 	}
 
 

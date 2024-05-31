@@ -2,11 +2,12 @@ namespace csSiteGen;
 
 
 /// <summary>
-/// Class <c>RuntimeSettings</p> Contains all the settings that could be loaded from the commandline.
+/// Class <c>RuntimeSettings</c> Contains all the settings that could be loaded from the commandline.
 /// </summary>
 public class RuntimeSettings {
 	public DirectoryInfo InputDirectory {get; private set;}
 	public DirectoryInfo OutputDirectory {get; private set;}
+	public string? BaseUrl {get; private set;}
 
 
 	public RuntimeSettings(string inputDirectory, string outputDirectory){
@@ -26,4 +27,7 @@ public class RuntimeSettings {
 		*/
 	}
 
+	public void setBaseUrl(string? baseurl) {
+		BaseUrl = baseurl;
+	}
 }
