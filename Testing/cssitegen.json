@@ -1,5 +1,6 @@
 {
 	"Source" : "./src",
 	"Destination" : "./dst",
-	"BaseUrl" : null
+	"BaseUrl" : null,
+	"SiteName" : "Example Town"
 }

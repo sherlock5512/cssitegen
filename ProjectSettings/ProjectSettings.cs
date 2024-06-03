@@ -5,10 +5,11 @@ using System.Text.Json.Serialization;
 public class ProjectSettings
 {
 	// The Source and Destination need to be public for the json constructor to work properly.
+	private DirectoryInfo? _ProjectRoot;
     public string Source {get; private set;}
 	public string Destination {get; private set;}
-	private DirectoryInfo? _ProjectRoot;
 	public string? BaseUrl {get; private set;}
+	public string? SiteName {get; private set;}
 
 	public DirectoryInfo InputDirectory {get {
 		if (_ProjectRoot is null)
@@ -26,10 +27,11 @@ public class ProjectSettings
 	}}
 
 	[JsonConstructor]
-	public ProjectSettings(String source, String destination, string baseUrl) {
+	public ProjectSettings(string source, string destination, string baseUrl, string siteName) {
 		Source = source;
 		Destination = destination;
 		BaseUrl = baseUrl;
+		SiteName = siteName;
 	}
 
 	public void setProjectRoot(string projectRoot) {

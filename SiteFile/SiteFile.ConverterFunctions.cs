@@ -15,7 +15,7 @@ public static class Conversions{
 		{".md", Pandoc},
 	};
 
-	private static readonly string[] BaseUrlFiletypes = {
+	private static readonly string[] StringReplaceFiletypes = {
 		".md",
 		".html"
 	};
@@ -46,9 +46,9 @@ public static class Conversions{
 		}
 
 		try {
-			if (BaseUrlFiletypes.Contains(file.Extension))
+			if (StringReplaceFiletypes.Contains(file.Extension))
 			{
-				File.WriteAllText(newPath.FullName, BaseUrlReplace(file, settings));
+				File.WriteAllText(newPath.FullName, StringReplace(file, settings));
 			}
 			else
 			{
@@ -110,13 +110,13 @@ public static class Conversions{
 
 		// the empty string is used as it has a defined identity
 		string tmpFile = string.Empty;
-		if (BaseUrlFiletypes.Contains(file.Extension))
+		if (StringReplaceFiletypes.Contains(file.Extension))
 		{
 			Log.Information("Replacing baseurl for file {f}",file.FullName);
 		    tmpFile = Path.Join(Path.GetTempPath(),"pandoc",file.Name);
 			Directory.CreateDirectory(Path.GetDirectoryName(tmpFile)!); // NOTE: It is practially impossible that this would actually return null
 			File.Create(tmpFile).Close(); // TODO: Use the filestream provided by File.Create within a using block to write the text
-			File.WriteAllText(tmpFile,BaseUrlReplace(file,settings));
+			File.WriteAllText(tmpFile,StringReplace(file,settings));
 
 			if (template is not null)
 			{
@@ -124,7 +124,7 @@ public static class Conversions{
 				string tmpTemplateFile = Path.Join(Path.GetTempPath(),"pandoc",template.Name);
 				Directory.CreateDirectory(Path.GetDirectoryName(tmpTemplateFile)!); // NOTE: It is practially impossible that this would actually return null
 				File.Create(tmpTemplateFile).Close(); // TODO: Use the filestream provided by File.Create within a using block to write the text
-				File.WriteAllText(tmpTemplateFile,BaseUrlReplace(template,settings));
+				File.WriteAllText(tmpTemplateFile,StringReplace(template,settings));
 				template = new(tmpTemplateFile);
 			}
 		}
@@ -214,8 +214,8 @@ public static class Conversions{
 			.Replace(file.Extension,newExtension ?? file.Extension);
 	}
 
-	private static string? BaseUrlReplace(FileInfo file, ProjectSettings settings){
-		Log.Information("Doing BaseUrlReplace for {f}", file.FullName);
+	private static string StringReplace(FileInfo file, ProjectSettings settings){
+		Log.Information("Doing StringReplace for {f}", file.FullName);
 		// Read the file
 		using (StreamReader FileReader = file.OpenText())
 		{
@@ -223,12 +223,27 @@ public static class Conversions{
 
 			if (settings.BaseUrl is null)
 			{
-				Log.Warning("BaseUrl is null, replacing templateString with nothing.");
-				return filestring.Replace("%BASEURL%","");
+				Log.Warning("BaseUrl is null, replacing %BASEURL% with nothing.");
+				filestring = filestring.Replace("%BASEURL%","");
+			}
+			else
+			{
+				Log.Information("Replacing %BASEURL% with {BaseUrl}",settings.BaseUrl);
+				filestring = filestring.Replace("%BASEURL%",settings.BaseUrl);
 			}
 
-			Log.Information("Replacing templateString with {BaseUrl}",settings.BaseUrl);
-			return filestring.Replace("%BASEURL%",settings.BaseUrl);
+			if (settings.SiteName is null)
+			{
+			    Log.Warning("SiteName is null, replacing %SITENAME% with nothing.");
+				filestring = filestring.Replace("%SITENAME%","");
+			}
+			else
+			{
+				Log.Information("Replacing %SITENAME% with {SiteName}",settings.SiteName);
+				filestring = filestring.Replace("%SITENAME%",settings.SiteName);
+			}
+
+			return filestring;
 		}
 	}
 
