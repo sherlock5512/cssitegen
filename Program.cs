@@ -26,6 +26,7 @@ using System.Diagnostics;
 using System.Reflection;
 using Spectre.Console;
 using System.Text.Json;
+using System.Text.Json.Serialization;
 
 namespace csSiteGen;
 
@@ -153,14 +154,16 @@ class Program
 
 		List<SiteFile> siteFiles = new();
 
-		Utils.GetFiles(settings.InputDirectory).ForEach(x => siteFiles.Add(new SiteFile(x)));
-		Log.Information("SiteFiles: {@sf} {count}", siteFiles, siteFiles.Count);
+		Utils.GetFiles(settings.InputDirectory).ForEach(x => {
+				siteFiles.Add(new SiteFile(x));
+				Log.Debug("Found file {file}",x.FullName);
+				});
+		Log.Information("SiteFiles Found {count}", siteFiles, siteFiles.Count);
 
 		Console.WriteLine($"Converting {siteFiles.Count} files from {settings.InputDirectory.FullName} to {settings.OutputDirectory.FullName}");
 
 
 		Dictionary<string,bool> fileStatus = new();
-		Log.Debug("fileStatus {@fileStatus}",fileStatus);
 
 		AnsiConsole.Progress()
 			.AutoRefresh(true)
@@ -190,14 +193,11 @@ class Program
 						Log.Warning("{name} Failed...",siteFiles[i].FullName);
 					    tasks[i].Description += " [red]FAILED[/]";
 					}
-					Log.Information("adding {@siteFile} conversion status to fileStatus", siteFiles[i]);
-					Log.Debug("FileStatus {@fileStatus}",fileStatus);
+					Log.Information("adding {siteFile} conversion status to fileStatus", siteFiles[i].FullName);
 					fileStatus.Add(siteFiles[i].FullName,res);
 					overallTask.Increment(1);
 				}
 			});
-
-		Log.Information("Conversion Status {@status}", fileStatus);
 
 		var Failed = fileStatus.Where(x => x.Value == false);
 		if ( Failed.Count() > 0)
@@ -289,7 +289,8 @@ class Program
 			.Deserialize<ProjectSettings>(
 					projectFile
 					.OpenText()
-					.ReadToEnd()
+					.ReadToEnd(),
+					SourceGenerationContext.Default.ProjectSettings
 		);
 
 		if (projectSettings is null)
@@ -299,8 +300,13 @@ class Program
 		}
 		projectSettings.setProjectRoot(ProjectDirectory);
 
-		Log.Information("{@ps}",projectSettings);
-
 		return projectSettings;
 	}
+
+}
+
+[JsonSourceGenerationOptions(WriteIndented = true)]
+[JsonSerializable(typeof(ProjectSettings))]
+internal partial class SourceGenerationContext : JsonSerializerContext
+{
 }

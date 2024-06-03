@@ -1,4 +1,5 @@
 using System.Text.Json;
+using System.Text.Json.Serialization;
 using Serilog;
 namespace csSiteGen;
 
@@ -58,7 +59,7 @@ public partial class SiteFile
 			{
 			    Metadata.Add(info.FullName,info.LastWriteTimeUtc);
 			}
-			Log.Debug("Metadata Dictionary now {@Metadata}", Metadata);
+			Log.Debug("Metadata Dictionary now has {Metadata} items", Metadata.Count);
 			SaveMetadata(settings);
 		}
 
@@ -95,8 +96,8 @@ public partial class SiteFile
 		{
 			string metaJson = File.ReadAllText(metaFile);
 			Log.Debug("Read Json {metaJson}", metaJson);
-			Metadata = JsonSerializer.Deserialize<Dictionary<string, DateTime>>(metaJson);
-			Log.Debug("Deserialized to {@Metadata}",Metadata);
+			Metadata = JsonSerializer.Deserialize<Dictionary<string, DateTime>>(metaJson,SerializeMetadataContext.Default.DictionaryStringDateTime);
+			Log.Debug("Deserialized Metadata with {c} items",Metadata!.Count);
 		}
 		catch (IOException e)
 		{
@@ -124,7 +125,7 @@ public partial class SiteFile
 		string metaJson;
 		try
 		{
-			metaJson = JsonSerializer.Serialize<Dictionary<string, DateTime>>(Metadata);
+			metaJson = JsonSerializer.Serialize<Dictionary<string, DateTime>>(Metadata,SerializeMetadataContext.Default.DictionaryStringDateTime);
 			Log.Debug("metaJson: {metaJson}",metaJson);
 		}
 		catch (JsonException e)
@@ -135,4 +136,10 @@ public partial class SiteFile
 		Log.Information("Writing metadata");
 		File.WriteAllText(metaFile, metaJson);
 	}
+}
+
+[JsonSourceGenerationOptions(GenerationMode = JsonSourceGenerationMode.Serialization)]
+[JsonSerializable(typeof(Dictionary<string,DateTime>))]
+internal partial class SerializeMetadataContext : JsonSerializerContext
+{
 }

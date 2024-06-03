@@ -48,7 +48,7 @@ public static partial class Utils {
 		result = candidateExecutables.First();
 		PathSearchMemo.Add(Program,result);
 		Log.Information("Found {program} at {path}",Program, result);
-		Log.Debug("Adding {@entry} to PathSearchMemo", PathSearchMemo.Last());
+		Log.Debug("Adding to PathSearchMemo", PathSearchMemo.Last().Value);
 		return result;
 	}
 }
