@@ -30,7 +30,7 @@ public partial class SiteFile
 
 		Log.Information("{file} extension is {ext}",fileInfo.FullName, fileInfo.Extension);
 		// Using this Ensures that the ConverterFunction is Always set.
-		// ConverterFunctions ALWAYS accept just the FileInfo, and RuntimeSettings passed at convert time.
+		// ConverterFunctions ALWAYS accept just the FileInfo, and ProjectSettings passed at convert time.
 		ConverterFunction = Conversions.Mappings.GetValueOrDefault(info.Extension, Conversions.RawCpy);
 	}
 
@@ -38,7 +38,7 @@ public partial class SiteFile
 	///	Convert the file, placing it in the correct place in the output directory.
 	/// If a filetype conversion is not needed, or specified, then the file is simply copied.
 	/// </summary>
-	public bool Convert(RuntimeSettings settings)
+	public bool Convert(ProjectSettings settings)
 	{
 		if (!NeedsUpdating(settings))
 		{
@@ -65,7 +65,7 @@ public partial class SiteFile
 		return res;
 	}
 
-	private bool NeedsUpdating(RuntimeSettings settings)
+	private bool NeedsUpdating(ProjectSettings settings)
 	{
 		if (Metadata is null)
 		{
@@ -87,7 +87,7 @@ public partial class SiteFile
 	 * But that ensures that if you remove the output directory the site will be
 	 * Fully recreated.
 	 */
-	private void LoadMetadata(RuntimeSettings settings)
+	private void LoadMetadata(ProjectSettings settings)
 	{
 		string metaFile = $"{settings.OutputDirectory}/.files";
 		Log.Information("Loading Metadata from {file}",metaFile);
@@ -113,7 +113,7 @@ public partial class SiteFile
 		}
 	}
 
-	private void SaveMetadata(RuntimeSettings settings)
+	private void SaveMetadata(ProjectSettings settings)
 	{
 		if (Metadata is null)
 		{

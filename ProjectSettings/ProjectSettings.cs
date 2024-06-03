@@ -2,32 +2,33 @@ using System.Text.Json.Serialization;
 // project settings is a user accessible config to set the Source and destination of a site
 // This may include more scope in the future such as holding the site base address etc..
 
-class ProjectSettings
+public class ProjectSettings
 {
-    private string _Source;
-	private string _Destination;
+	// The Source and Destination need to be public for the json constructor to work properly.
+    public string Source {get; private set;}
+	public string Destination {get; private set;}
 	private DirectoryInfo? _ProjectRoot;
 	public string? BaseUrl {get; private set;}
 
-	public string Source {get {
+	public DirectoryInfo InputDirectory {get {
 		if (_ProjectRoot is null)
 		{
-		    return _Source;
+		    return new(Source);
 		}
-		return Path.Combine(_ProjectRoot.FullName,_Source);
+		return new(Path.Combine(_ProjectRoot.FullName,Source));
 	}}
-	public string Destination {get {
+	public DirectoryInfo OutputDirectory {get {
 		if (_ProjectRoot is null)
 		{
-		    return _Destination;
+		    return new(Destination);
 		}
-		return Path.Combine(_ProjectRoot.FullName,_Destination);
+		return new(Path.Combine(_ProjectRoot.FullName,Destination));
 	}}
 
 	[JsonConstructor]
 	public ProjectSettings(String source, String destination, string baseUrl) {
-		_Source = source;
-		_Destination = destination;
+		Source = source;
+		Destination = destination;
 		BaseUrl = baseUrl;
 	}
 
@@ -38,7 +39,9 @@ class ProjectSettings
 		_ProjectRoot = projectRoot;
 	}
 
-	public void setBaseUrl(string baseUrl) {
-		BaseUrl = baseUrl;
-	}
+	/*
+	 * public void setBaseUrl(string baseUrl) {
+	 *     BaseUrl = baseUrl;
+	 * }
+	 */
 }

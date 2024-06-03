@@ -149,21 +149,14 @@ class Program
 		AnsiConsole.Console.Profile.Capabilities.Ansi = true;
 
 
-		// NOTE: Future refactors may merge ProjectSettings and RuntimeSettings
-		ProjectSettings projectSettings = GetProjectSettings(ProjectDirectory);
-
-		DirectoryInfo inputDir = new(projectSettings.Source);
-		DirectoryInfo outputDir = new(projectSettings.Destination);
-
-		RuntimeSettings settings = new(inputDir,outputDir);
-		settings.setBaseUrl(projectSettings.BaseUrl);
+		ProjectSettings settings = GetProjectSettings(ProjectDirectory);
 
 		List<SiteFile> siteFiles = new();
 
-		Utils.GetFiles(inputDir).ForEach(x => siteFiles.Add(new SiteFile(x)));
+		Utils.GetFiles(settings.InputDirectory).ForEach(x => siteFiles.Add(new SiteFile(x)));
 		Log.Information("SiteFiles: {@sf} {count}", siteFiles, siteFiles.Count);
 
-		Console.WriteLine($"Converting {siteFiles.Count} files from {inputDir.FullName} to {outputDir.FullName}");
+		Console.WriteLine($"Converting {siteFiles.Count} files from {settings.InputDirectory.FullName} to {settings.OutputDirectory.FullName}");
 
 
 		Dictionary<string,bool> fileStatus = new();
@@ -224,40 +217,36 @@ class Program
 	{
 		Log.Information("Clean command was called, Beginning cleaning");
 
-		// NOTE: Future refactors may merge ProjectSettings and RuntimeSettings
-		ProjectSettings projectSettings = GetProjectSettings(ProjectDirectory);
+		ProjectSettings settings = GetProjectSettings(ProjectDirectory);
 
-		DirectoryInfo inputDir = new(projectSettings.Source);
-		DirectoryInfo outputDir = new(projectSettings.Destination);
-
-		if (!outputDir.Exists)
+		if (!settings.OutputDirectory.Exists)
 		{
-			Log.Warning("Not deleting {dir} as it doesn't exist",outputDir.FullName);
-			AnsiConsole.MarkupLineInterpolated($"[bold][[[yellow]Warning[/]]][/] Not cleaning [blue]\"{outputDir}\"[/] as it does not exist.");
+			Log.Warning("Not deleting {dir} as it doesn't exist",settings.OutputDirectory.FullName);
+			AnsiConsole.MarkupLineInterpolated($"[bold][[[yellow]Warning[/]]][/] Not cleaning [blue]\"{settings.OutputDirectory.FullName}\"[/] as it does not exist.");
 			return 0; // success because it doesn't exist.
 		}
 		try
 		{
-			Log.Information("Cleaning {dir}",outputDir.FullName);
-			AnsiConsole.MarkupInterpolated($"Cleaning [blue]\"{outputDir.FullName}\"[/]");
-			outputDir.Delete(recursive: true);
-			outputDir.Create();
+			Log.Information("Cleaning {dir}",settings.OutputDirectory.FullName);
+			AnsiConsole.MarkupInterpolated($"Cleaning [blue]\"{settings.OutputDirectory.FullName}\"[/]");
+			settings.OutputDirectory.Delete(recursive: true);
+			settings.OutputDirectory.Create();
 			AnsiConsole.MarkupLine(" [bold][[[green]OK[/]]][/]");
-			AnsiConsole.MarkupLineInterpolated($"\t[grey]>>[/] [green]All files in {outputDir.FullName} purged successfully[/]");
+			AnsiConsole.MarkupLineInterpolated($"\t[grey]>>[/] [green]All files in {settings.OutputDirectory.FullName} purged successfully[/]");
 			return 0;
 		}
 		catch (System.Security.SecurityException e)
 		{
 			AnsiConsole.MarkupLine(" [bold][[[red]Fail[/]]][/]");
 			AnsiConsole.MarkupLine("[orangered1]See log for more details about what went wrong.[/]");
-			Log.Error(e, "Failed to delete directory {dir} due to permission error.", outputDir.FullName);
+			Log.Error(e, "Failed to delete directory {dir} due to permission error.", settings.OutputDirectory.FullName);
 			return 1;
 		}
 		catch (Exception e)
 		{
 			AnsiConsole.MarkupLine(" [red][[[bold]Fail[/]]][/]");
 			AnsiConsole.MarkupLine("[orangered1]See log for more details about what went wrong.[/]");
-			Log.Error(e, "Failed to delete/create directory {dir}", outputDir.FullName);
+			Log.Error(e, "Failed to delete/create directory {dir}", settings.OutputDirectory.FullName);
 			return 1;
 		}
 	}

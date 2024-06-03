@@ -6,7 +6,7 @@ namespace csSiteGen;
 public static class Conversions{
 
 
-	public delegate bool ConvertFunc(FileInfo file, RuntimeSettings settings);
+	public delegate bool ConvertFunc(FileInfo file, ProjectSettings settings);
 
 	/// <summary>
 	/// A Mapping of filetype to ConvertFunc.
@@ -24,7 +24,7 @@ public static class Conversions{
 	/// <summary>
 	///	TEST FUNCTION.
 	/// </summary>
-	public static bool NoOp(FileInfo file, RuntimeSettings settings){
+	public static bool NoOp(FileInfo file, ProjectSettings settings){
 		Log.Information("Performing NoOp Conversion");
 		string newName = GetNewName(file,settings,"NoOp");
 		Log.Debug("{FullName} -> {newName}",file.FullName,newName);
@@ -35,7 +35,7 @@ public static class Conversions{
 	/// <summary>
 	/// Copy the file verbatim (doing any baseurl replacements if needed)
 	/// </summary>
-	public static bool RawCpy(FileInfo file, RuntimeSettings settings){
+	public static bool RawCpy(FileInfo file, ProjectSettings settings){
 		FileInfo newPath = new FileInfo(GetNewName(file,settings,null));
 
 		Log.Information("RawCpy: Copying {file} to {dest}",file.FullName, newPath.FullName);
@@ -65,7 +65,7 @@ public static class Conversions{
 	/// <summary>
 	/// Execute pandoc on the file, automatically detecting the template to use.
 	/// </summary>
-	public static bool Pandoc(FileInfo file, RuntimeSettings settings){
+	public static bool Pandoc(FileInfo file, ProjectSettings settings){
 		// NOTE: Some of the code later where the tmpfile is created for baseurl replacement may be too safe.
 		// the extension checks may be unnecessary, but this depends on if this function will be retooled to run pandoc for different conversions.
 		// for now I have take the safer approach, but the leaner approach may be used in the future when the project is more mature
@@ -208,13 +208,13 @@ public static class Conversions{
 		return true;
 	}
 
-	private static string GetNewName(FileInfo file, RuntimeSettings settings, string? newExtension){
+	private static string GetNewName(FileInfo file, ProjectSettings settings, string? newExtension){
 		return file.FullName
 			.Replace(settings.InputDirectory.FullName, settings.OutputDirectory.FullName)
 			.Replace(file.Extension,newExtension ?? file.Extension);
 	}
 
-	private static string? BaseUrlReplace(FileInfo file, RuntimeSettings settings){
+	private static string? BaseUrlReplace(FileInfo file, ProjectSettings settings){
 		Log.Information("Doing BaseUrlReplace for {f}", file.FullName);
 		// Read the file
 		using (StreamReader FileReader = file.OpenText())
