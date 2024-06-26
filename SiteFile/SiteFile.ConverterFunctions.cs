@@ -151,6 +151,11 @@ public static class Conversions{
 		}
 
 		pandocArgs += " --from markdown+raw_attribute ";
+		if (!string.IsNullOrEmpty(settings.SiteName))
+		{
+			// This is used in my template to add the sitename to the title element.
+			pandocArgs += $" --metadata=\"SiteName:{settings.SiteName}\"";
+		}
 		if (!Directory.Exists(Path.GetDirectoryName(GetNewName(file,settings,".html"))))
 		{
 		   Directory.CreateDirectory(Path.GetDirectoryName(GetNewName(file,settings,".html"))!);
