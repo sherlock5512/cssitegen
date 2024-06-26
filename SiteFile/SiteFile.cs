@@ -29,7 +29,7 @@ public partial class SiteFile
 	{
 		info = fileInfo;
 
-		Log.Information("{file} extension is {ext}",fileInfo.FullName, fileInfo.Extension);
+		Log.Debug("{file} extension is {ext}",fileInfo.FullName, fileInfo.Extension);
 		// Using this Ensures that the ConverterFunction is Always set.
 		// ConverterFunctions ALWAYS accept just the FileInfo, and ProjectSettings passed at convert time.
 		ConverterFunction = Conversions.Mappings.GetValueOrDefault(info.Extension, Conversions.RawCpy);

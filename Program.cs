@@ -158,7 +158,7 @@ class Program
 				siteFiles.Add(new SiteFile(x));
 				Log.Debug("Found file {file}",x.FullName);
 				});
-		Log.Information("SiteFiles Found {count}", siteFiles, siteFiles.Count);
+		Log.Information("SiteFiles Found {count}", siteFiles.Count);
 
 		Console.WriteLine($"Converting {siteFiles.Count} files from {settings.InputDirectory.FullName} to {settings.OutputDirectory.FullName}");
 
