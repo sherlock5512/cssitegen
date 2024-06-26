@@ -112,7 +112,7 @@ public static class Conversions{
 		string tmpFile = string.Empty;
 		if (StringReplaceFiletypes.Contains(file.Extension))
 		{
-			Log.Information("Replacing baseurl for file {f}",file.FullName);
+			Log.Information("calling string replace for file {f}",file.FullName);
 		    tmpFile = Path.Join(Path.GetTempPath(),"pandoc",file.Name);
 			Directory.CreateDirectory(Path.GetDirectoryName(tmpFile)!); // NOTE: It is practially impossible that this would actually return null
 			File.Create(tmpFile).Close(); // TODO: Use the filestream provided by File.Create within a using block to write the text
@@ -120,7 +120,7 @@ public static class Conversions{
 
 			if (template is not null)
 			{
-				Log.Information("Replacing baseurl in template file");
+				Log.Information("calling string replace for template file");
 				string tmpTemplateFile = Path.Join(Path.GetTempPath(),"pandoc",template.Name);
 				Directory.CreateDirectory(Path.GetDirectoryName(tmpTemplateFile)!); // NOTE: It is practially impossible that this would actually return null
 				File.Create(tmpTemplateFile).Close(); // TODO: Use the filestream provided by File.Create within a using block to write the text
