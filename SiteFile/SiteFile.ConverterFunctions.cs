@@ -150,6 +150,7 @@ public static class Conversions{
 			Log.Warning("Pandoc template for {file} not found",file.Name);
 		}
 
+		pandocArgs += " --from markdown+raw_attribute ";
 		if (!Directory.Exists(Path.GetDirectoryName(GetNewName(file,settings,".html"))))
 		{
 		   Directory.CreateDirectory(Path.GetDirectoryName(GetNewName(file,settings,".html"))!);
