@@ -1,9 +1,5 @@
-- UPDATE README
-
 - Make the code such that the metadata file knows what source file an output file came from, this will allow us to delete files from source
   and force consistency by removing them from the dst directory too.
 
 - Add a pre-commit or other type of hook to ensure that the Testing directory is properly cleaned and reset before commit.
 	- Ensure that the .gitkeep file is placed into Testing/dst
-
-- Look into the possiblity of using a TemplateTemplate, And generating the pandoc template on the fly making it possible to switch out domian/prefix stuff
